@@ -1,0 +1,516 @@
+
+SQL> create or replace procedure categoryentry(cat char, sub char)
+  2  is
+  3  newcid number(3);
+  4  newsid number(3);
+  5  begin
+  6  select nvl(max(cid),0) into newcid from category where description = cat;
+  7  if newcid=0 then
+  8  select nvl(max(cid),0)+1 into newcid from category;
+  9  insert into category values (newcid, cat);
+ 10  end if;
+ 11  select nvl(max(sid),0)+1 into newsid from subcategory;
+ 12  insert into subcategory values(newcid, newsid, sub);
+ 13  end;
+ 14* /
+Procedure CATEGORYENTRY compiled
+
+
+SQL> call categoryentry('food', 'fast food');
+Call completed.
+
+SQL> select * from category;
+
+       CID DESCRIPTION         
+---------- --------------------
+         1 food                
+         2 sports              
+
+SQL> select * from subcategory;
+
+       CID        SID DESCRIPTION         
+---------- ---------- --------------------
+         1          1 fast food           
+
+
+SQL> call categoryentry('food', 'drinks');
+Call completed.
+
+
+SQL> select * from subcategory;
+
+       CID        SID DESCRIPTION         
+---------- ---------- --------------------
+         1          1 fast food           
+         1          2 drinks              
+
+
+SQL> call categoryentry('entertainment', 'clowns');
+Call completed.
+
+
+SQL> select * from subcategory;
+
+       CID        SID DESCRIPTION         
+---------- ---------- --------------------
+         1          1 fast food           
+         1          2 drinks              
+         3          3 clowns              
+
+
+SQL> select * from category;
+
+       CID DESCRIPTION         
+---------- --------------------
+         1 food                
+         2 sports              
+         3 entertainment       
+
+SQL> create or replace function double (a number) return number
+  2  is
+  3  result number(3);
+  4  begin
+  5  result:=a*2;
+  6  return result;
+  7  end;
+  8  /
+
+Function DOUBLE compiled
+
+SQL> create or replace function tax(s number) return number
+  2  is
+  3  result number(7,2);
+  4  begin
+  5  result:= s*21/100;
+  6  return result;
+  7  end;
+  8* /
+Function TAX compiled
+
+
+SYSDATE  
+---------
+23-MAY-19
+
+
+SQL> select double(7) from dual;
+
+ DOUBLE(7)
+----------
+        14
+
+SQL> select 567*2 from dual;
+
+     567*2
+----------
+      1134
+
+
+SQL> select first_name, last_name, salary, tax(salary) as "TAX", salary-tax(salary)as "NET SALARY" from employees where salary>10000;
+FIRST_NAME           LAST_NAME                     SALARY        TAX NET SALARY
+-------------------- ------------------------- ---------- ---------- ----------
+Steven               King                           24000       5040      18960
+Neena                Kochhar                        17000       3570      13430
+Lex                  De Haan                        17000       3570      13430
+Nancy                Greenberg                      12000       2520       9480
+Den                  Raphaely                       11000       2310       8690
+John                 Russell                        14000       2940      11060
+Karen                Partners                       13500       2835      10665
+Alberto              Errazuriz                      12000       2520       9480
+Gerald               Cambrault                      11000       2310       8690
+Eleni                Zlotkey                        10500       2205       8295
+Clara                Vishney                        10500       2205       8295
+Lisa                 Ozer                           11500       2415       9085
+Ellen                Abel                           11000       2310       8690
+Michael              Hartstein                      13000       2730      10270
+Shelley              Higgins                        12000       2520       9480
+
+15 rows selected. 
+
+
+SQL> create or replace function tax2(s number) return number
+  2  is
+  3  result number(7,2);
+  4  begin
+  5  if s<=500 then result:= 0;
+  6  end if;
+  7  if s>500 and s<=1000 then result:= s*15/100;
+  8  end if;
+  9  if s>1000 then result:= s*21/100;
+ 10  end if;
+ 11  return result;
+ 12  end;
+ 13  /
+
+Function TAX2 compiled
+
+SQL> 
+
+SQL> create or replace function dname(d number) return char
+  2  is
+  3  dn departments.department_name%type;
+  4  begin
+  5  select department_name into dn from departments where department_id =d;
+  6  return dn;
+  7  end;
+  8* /
+Function DNAME compiled
+
+
+SQL> select first_name,last_name, substr(dname(department_id),1,10), tax2(salary) from employees;
+
+FIRST_NAME           LAST_NAME                 SUBSTR(DNAME(DEPARTMENT_ID),1,10)        TAX2(SALARY)
+-------------------- ------------------------- ---------------------------------------- ------------
+Steven               King                      Executive                                        5040
+Neena                Kochhar                   Executive                                        3570
+Lex                  De Haan                   Executive                                        3570
+Alexander            Hunold                    IT                                               1350
+Bruce                Ernst                     IT                                                900
+David                Austin                    IT                                                  0
+Valli                Pataballa                 IT                                                  0
+Diana                Lorentz                   IT                                                  0
+Nancy                Greenberg                 Finance                                          2520
+Daniel               Faviet                    Finance                                          1350
+John                 Chen                      Finance                                          1230
+Ismael               Sciarra                   Finance                                          1155
+Jose Manuel          Urman                     Finance                                          1170
+Luis                 Popp                      Finance                                          1035
+Den                  Raphaely                  Purchasing                                       2310
+Alexander            Khoo                      Purchasing                                          0
+Shelli               Baida                     Purchasing                                          0
+Sigal                Tobias                    Purchasing                                          0
+Guy                  Himuro                    Purchasing                                          0
+Karen                Colmenares                Purchasing                                          0
+Matthew              Weiss                     Shipping                                         1200
+
+FIRST_NAME           LAST_NAME                 SUBSTR(DNAME(DEPARTMENT_ID),1,10)        TAX2(SALARY)
+-------------------- ------------------------- ---------------------------------------- ------------
+Adam                 Fripp                     Shipping                                         1230
+Payam                Kaufling                  Shipping                                         1185
+Shanta               Vollman                   Shipping                                          975
+Kevin                Mourgos                   Shipping                                          870
+Julia                Nayer                     Shipping                                            0
+Irene                Mikkilineni               Shipping                                            0
+James                Landry                    Shipping                                            0
+Steven               Markle                    Shipping                                            0
+Laura                Bissot                    Shipping                                            0
+Mozhe                Atkinson                  Shipping                                            0
+James                Marlow                    Shipping                                            0
+TJ                   Olson                     Shipping                                            0
+Jason                Mallin                    Shipping                                            0
+Michael              Rogers                    Shipping                                            0
+Ki                   Gee                       Shipping                                            0
+Hazel                Philtanker                Shipping                                            0
+Renske               Ladwig                    Shipping                                            0
+Stephen              Stiles                    Shipping                                            0
+John                 Seo                       Shipping                                            0
+Joshua               Patel                     Shipping                                            0
+Trenna               Rajs                      Shipping                                            0
+
+FIRST_NAME           LAST_NAME                 SUBSTR(DNAME(DEPARTMENT_ID),1,10)        TAX2(SALARY)
+-------------------- ------------------------- ---------------------------------------- ------------
+Curtis               Davies                    Shipping                                            0
+Randall              Matos                     Shipping                                            0
+Peter                Vargas                    Shipping                                            0
+John                 Russell                   Sales                                            2940
+Karen                Partners                  Sales                                            2835
+Alberto              Errazuriz                 Sales                                            2520
+Gerald               Cambrault                 Sales                                            2310
+Eleni                Zlotkey                   Sales                                            2205
+Peter                Tucker                    Sales                                            1500
+David                Bernstein                 Sales                                            1425
+Peter                Hall                      Sales                                            1350
+Christopher          Olsen                     Sales                                            1200
+Nanette              Cambrault                 Sales                                            1125
+Oliver               Tuvault                   Sales                                            1050
+Janette              King                      Sales                                            1500
+Patrick              Sully                     Sales                                            1425
+Allan                McEwen                    Sales                                            1350
+Lindsey              Smith                     Sales                                            1200
+Louise               Doran                     Sales                                            1125
+Sarath               Sewall                    Sales                                            1050
+Clara                Vishney                   Sales                                            2205
+
+FIRST_NAME           LAST_NAME                 SUBSTR(DNAME(DEPARTMENT_ID),1,10)        TAX2(SALARY)
+-------------------- ------------------------- ---------------------------------------- ------------
+Danielle             Greene                    Sales                                            1425
+Mattea               Marvins                   Sales                                            1080
+David                Lee                       Sales                                            1020
+Sundar               Ande                      Sales                                             960
+Amit                 Banda                     Sales                                             930
+Lisa                 Ozer                      Sales                                            2415
+Harrison             Bloom                     Sales                                            1500
+Tayler               Fox                       Sales                                            1440
+William              Smith                     Sales                                            1110
+Elizabeth            Bates                     Sales                                            1095
+Sundita              Kumar                     Sales                                             915
+Ellen                Abel                      Sales                                            2310
+Alyssa               Hutton                    Sales                                            1320
+Jonathon             Taylor                    Sales                                            1290
+Jack                 Livingston                Sales                                            1260
+Kimberely            Grant                     NULL                                             1050
+Charles              Johnson                   Sales                                             930
+Winston              Taylor                    Shipping                                            0
+Jean                 Fleaur                    Shipping                                            0
+Martha               Sullivan                  Shipping                                            0
+Girard               Geoni                     Shipping                                            0
+
+FIRST_NAME           LAST_NAME                 SUBSTR(DNAME(DEPARTMENT_ID),1,10)        TAX2(SALARY)
+-------------------- ------------------------- ---------------------------------------- ------------
+Nandita              Sarchand                  Shipping                                            0
+Alexis               Bull                      Shipping                                            0
+Julia                Dellinger                 Shipping                                            0
+Anthony              Cabrio                    Shipping                                            0
+Kelly                Chung                     Shipping                                            0
+Jennifer             Dilly                     Shipping                                            0
+Timothy              Gates                     Shipping                                            0
+Randall              Perkins                   Shipping                                            0
+Sarah                Bell                      Shipping                                            0
+Britney              Everett                   Shipping                                            0
+Samuel               McCain                    Shipping                                            0
+Vance                Jones                     Shipping                                            0
+Alana                Walsh                     Shipping                                            0
+Kevin                Feeney                    Shipping                                            0
+Donald               OConnell                  Shipping                                            0
+Douglas              Grant                     Shipping                                            0
+Jennifer             Whalen                    Administra                                          0
+Michael              Hartstein                 Marketing                                        2730
+Pat                  Fay                       Marketing                                         900
+Susan                Mavris                    Human Reso                                        975
+Hermann              Baer                      Public Rel                                       1500
+
+FIRST_NAME           LAST_NAME                 SUBSTR(DNAME(DEPARTMENT_ID),1,10)        TAX2(SALARY)
+-------------------- ------------------------- ---------------------------------------- ------------
+Shelley              Higgins                   Accounting                                       2520
+William              Gietz                     Accounting                                       1245
+
+107 rows selected. 
+
+SQL> create or replace function countsubcat(sc number) return number
+  2  is
+  3  result number(3);
+  4  begin
+  5  select nvl(count(*),0) into result from subcategory where cid = sc;
+  6  return result;
+  7  end;
+  8* /
+Function COUNTSUBCAT compiled
+
+
+SQL> select description, countsubcat(cid) from category;
+
+DESCRIPTION          COUNTSUBCAT(CID)
+-------------------- ----------------
+food                                2
+sports                              0
+entertainment                       1
+
+
+
+SQL> create or replace function countprod(pc number) return number
+  2  is
+  3  result number(3);
+  4  begin
+  5  select nvl(count(*),0) into result from products where sid in(select sid from subcategory where sid = pc) ;
+  6  return result;
+  7  end;
+  8* /
+Function COUNTPROD compiled
+
+SQL> select description, countsubcat(cid), countprod(cid) from category;
+
+DESCRIPTION          COUNTSUBCAT(CID) COUNTPROD(CID)
+-------------------- ---------------- --------------
+food                                2              2
+sports                              0              1
+entertainment                       1              0
+
+SQL> 
+
+
+SQL> create or replace trigger delete_school after delete on school
+  2  declare
+     begin
+  3  dbms_output.put_line('you have deleted a record fool');
+  4  end;
+  5  /
+
+
+SQL> delete from school where regno=11;you have deleted a record fool
+
+
+1 row deleted.
+
+SQL> create or replace trigger delete_school after delete on school for each row
+  2  declare
+  3  begin
+  4  dbms_output.put_line('you have deleted a record you fool');
+  5  end;
+  6* /
+Trigger DELETE_SCHOOL compiled
+
+
+SQL> delete from school where marks<=75;
+you have deleted a record you fool
+you have deleted a record you fool
+
+
+2 rows deleted.
+
+
+SQL> create table backup_school(regno number(3), name char(20), marks number(3));
+
+Table BACKUP_SCHOOL created.
+
+SQL> create or replace trigger takebackup before delete on school for each row
+  2  begin
+  3  insert into backup_school values(:old.regno,:old.name,:old.marks);
+  4  end;
+  5* /
+Trigger TAKEBACKUP compiled
+
+SQL> create table backup_school as select * from school; 
+
+SQL> create table backup_school as select * from school;
+
+Table BACKUP_SCHOOL created.
+
+SQL> select * from school;
+
+     REGNO NAME                                MARKS
+---------- ------------------------------ ----------
+        11 adam                                   76
+        17 dave                                   96
+        98 rich                                   99
+
+
+SQL> select * from backup_school;
+     REGNO NAME                                MARKS
+---------- ------------------------------ ----------
+        11 adam                                   76
+        17 dave                                   96
+        98 rich                                   99
+
+SQL> delete from backup_school;
+
+3 rows deleted.
+
+
+SQL> select * from backup_school;
+
+
+SQL> delete from school where regno=11;
+
+1 row deleted.
+
+
+SQL> select * from backup_school;
+
+     REGNO NAME                                MARKS
+---------- ------------------------------ ----------
+        11 adam                                   76
+
+
+
+
+SQL> select * from school;
+
+     REGNO NAME                                MARKS
+---------- ------------------------------ ----------
+        98 rich                                   99
+
+SQL> insert into school values(27, 'dave', 88);
+
+1 row inserted.
+
+
+SQL> select * from school;
+
+     REGNO NAME                                MARKS
+---------- ------------------------------ ----------
+        27 dave                                   88
+        98 rich                                   99
+
+SQL> select * from backup_school;
+
+     REGNO NAME                                MARKS user                 date     
+---------- ------------------------------ ---------- -------------------- ---------
+        11 adam                                   76 NULL                 NULL     
+        17 dave                                   96 NULL                 NULL     
+
+SQL> delete from school where regno = 27;
+you have deleted a record you fool
+
+
+1 row deleted.
+
+
+SQL> select * from backup_school;
+
+     REGNO NAME                                MARKS user                 date     
+---------- ------------------------------ ---------- -------------------- ---------
+        11 adam                                   76 NULL                 NULL     
+        17 dave                                   96 NULL                 NULL     
+        27 dave                                   88 HR                   23-MAY-19
+
+
+
+
+SQL> create or replace trigger insert_trigger before insert on school for each row
+  2  begin
+  3  if :new.marks=58 or :new.marks=59 then :new.marks:=60;
+  4  end if;
+  5  :new.name:=upper(:new.name);
+  6  end;
+  7* /
+Trigger INSERT_TRIGGER compiled
+
+SQL> insert into school values (65, 'jon',58);
+
+1 row inserted.
+
+SQL> select * from school;
+
+     REGNO NAME                                MARKS
+---------- ------------------------------ ----------
+        65 JON                                    60
+        47 OLIVER                                 60
+        98 rich                                   99
+
+
+SQL> select * from consultants;
+
+     REGNO NAME                 CLIENT               SUBJECT                   MARKS
+---------- -------------------- -------------------- -------------------- ----------
+         1 a                    ibm                  java                         90
+         2 b                    ons                  java                         80
+         3 c                    ibm                  python                       90
+         4 d                    ons                  python                       95
+         5 e                    msoft                python                       75
+
+SQL> create view view1 as select * from consultants;
+
+View VIEW1 created.
+
+SQL> select * from view1;
+
+     REGNO NAME                 CLIENT               SUBJECT                   MARKS
+---------- -------------------- -------------------- -------------------- ----------
+         1 a                    ibm                  java                         90
+         2 b                    ons                  java                         80
+         3 c                    ibm                  python                       90
+         4 d                    ons                  python                       95
+         5 e                    msoft                python                       75
+
+
+SQL> create view viewibm as select * from consultants where client ='ibm';
+View VIEWIBM created.
+
+
+SQL> select * from viewibm;
+     REGNO NAME                 CLIENT               SUBJECT                   MARKS
+---------- -------------------- -------------------- -------------------- ----------
+         1 a                    ibm                  java                         90
+         3 c                    ibm                  python                       90
+
+

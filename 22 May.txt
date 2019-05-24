@@ -1,0 +1,802 @@
+
+SQL> select * from sales;
+       PID        QTY      PRICE DATE1    
+---------- ---------- ---------- ---------
+       101          3          2 20-MAY-19
+       102          2       1.75 20-MAY-19
+       105          5       1.05 20-MAY-19
+       101          2          2 21-MAY-19
+
+
+
+SQL> select name from products where pid in(select pid from sales group by pid having count (*) = (select max (count(*)) from sales group by pid));
+NAME                
+--------------------
+7up                 
+
+SQL> select * from subcategory;
+
+       CID        SID DESCRIPTION         
+---------- ---------- --------------------
+         1         10 drinks              
+         1         20 fast food           
+         2         30 cricket             
+
+SQL> insert into subcategory values (2, 40, 'football');
+
+1 row inserted.
+
+
+SQL> insert into subcategory values (2, 50, 'hockey');
+1 row inserted.
+
+
+SQL> select * from subcategory;
+
+       CID        SID DESCRIPTION         
+---------- ---------- --------------------
+         2         40 football            
+         2         50 hockey              
+         1         10 drinks              
+         1         20 fast food           
+         2         30 cricket             
+
+
+SQL> select * from products;
+       SID        PID NAME                
+---------- ---------- --------------------
+        10        101 7up                 
+        10        102 coke                
+        20        105 bat                 
+
+
+SQL> insert into products values (20, 106, 'burger');
+1 row inserted.
+
+
+SQL> insert into products values (20, 107, 'pizza');
+1 row inserted.
+
+
+SQL> insert into products values (20, 108, 'kebab');
+1 row inserted.
+
+
+SQL> select * from products;
+
+       SID        PID NAME                
+---------- ---------- --------------------
+        20        106 burger              
+        20        107 pizza               
+        20        108 kebab               
+        10        101 7up                 
+        10        102 coke                
+        20        105 bat                 
+
+6 rows selected. 
+
+SQL> update products set sid = 30 where name = 'bat';
+
+1 row updated.
+
+
+SQL> select * from products;
+
+       SID        PID NAME                
+---------- ---------- --------------------
+        20        106 burger              
+        20        107 pizza               
+        20        108 kebab               
+        10        101 7up                 
+        10        102 coke                
+        30        105 bat                 
+
+6 rows selected. 
+
+SQL> select * from sales;
+
+       PID        QTY      PRICE DATE1    
+---------- ---------- ---------- ---------
+       101          3          2 20-MAY-19
+       102          2       1.75 20-MAY-19
+       105          5       1.05 20-MAY-19
+       101          2          2 21-MAY-19
+
+
+SQL> select name from products where pid in(select pid from sales group by pid having count (*) = (select max (count(*)) from sales group by pid));
+
+NAME                
+--------------------
+7up                 
+
+
+SQL> select * from category where cid = (select cid from subcategory where sid = (select sid from products where pid = (select pid from sales where qty = (select max(qty) from sales))));
+
+       CID DESCRIPTION         
+---------- --------------------
+         2 sports              
+
+
+SQL> select name from products where pid in(select pid from sales group by pid having count (*) = (select max (count(*)) from sales group by pid));
+
+NAME                
+--------------------
+7up                 
+
+
+SQL> select * from category where cid = (select cid from subcategory where sid = (select sid from products where pid = (select pid from sales where qty in (select max(qty) from sales))));
+       CID DESCRIPTION         
+---------- --------------------
+         2 sports              
+
+
+
+
+SQL> select * from category where cid = (select cid from subcategory where sid = (select sid from products where pid = (select pid from sales where qty = (select max(qty) from sales))));
+       CID DESCRIPTION         
+---------- --------------------
+         2 sports              
+
+
+SQL> select * from sales;
+
+       PID        QTY      PRICE DATE1    
+---------- ---------- ---------- ---------
+       101          3          2 20-MAY-19
+       102          2       1.75 20-MAY-19
+       105          5       1.05 20-MAY-19
+       101          2          2 21-MAY-19
+
+
+SQL> select name from products where pid in(select pid from sales group by pid having count (*) = (select max (count(*)) from sales group by pid));
+
+NAME                
+--------------------
+7up                 
+
+
+SQL> select * from category where cid = (select cid from subcategory where sid =(select sid from products where pid in(select pid from sales group by pid having count (*) = (select max (count(*)) from sales group by pid))));
+       CID DESCRIPTION         
+---------- --------------------
+         1 food                
+
+SQL> select * from sales;
+
+       PID        QTY      PRICE DATE1    
+---------- ---------- ---------- ---------
+       101          3          2 20-MAY-19
+       102          2       1.75 20-MAY-19
+       105          5       1.05 20-MAY-19
+       101          2          2 21-MAY-19
+
+SQL> select * from products;
+
+       SID        PID NAME                
+---------- ---------- --------------------
+        20        106 burger              
+        20        107 pizza               
+        20        108 kebab               
+        10        101 7up                 
+        10        102 coke                
+        30        105 bat                 
+
+6 rows selected. 
+
+SQL> insert into sales values (106, 1, 5, sysdate);
+
+1 row inserted.
+
+
+SQL> insert into sales values (106, 2, 5, sysdate);
+1 row inserted.
+
+
+SQL> insert into sales values (107, 3, 8, sysdate);
+1 row inserted.
+
+
+SQL> select * from sales;
+
+       PID        QTY      PRICE DATE1    
+---------- ---------- ---------- ---------
+       106          1          5 22-MAY-19
+       106          2          5 22-MAY-19
+       107          3          8 22-MAY-19
+       101          3          2 20-MAY-19
+       102          2       1.75 20-MAY-19
+       105          5       1.05 20-MAY-19
+       101          2          2 21-MAY-19
+
+7 rows selected. 
+
+
+
+SQL> select * from category where cid in(select cid from subcategory where sid in(select sid from products where pid in(select pid from sales group by pid having count (*) in(select max (count(*)) from sales group by pid))));
+       CID DESCRIPTION         
+---------- --------------------
+         1 food                
+
+
+SQL> select * from category where cid in(select cid from subcategory where sid in(select sid from products where pid in(select pid from sales group by pid having count (*) in(select max (count(*)) from sales group by pid))));
+
+       CID DESCRIPTION         
+---------- --------------------
+         1 food                
+
+
+SQL> create or replace procedure First
+  2  is
+  3  begin
+  4  dbms_output.put_line('Hello');
+  5  dbms_output.put_line('my friends');
+  6  end;
+  7  
+  8* /
+Procedure FIRST compiled
+
+SQL> call First();
+
+Call completed.
+
+SQL> set server output on;
+
+
+
+SQL> call First();
+Hello
+my friends
+
+
+
+
+
+
+
+
+SQL> create or replace procedure Second
+  2  is
+  3  begin
+  4  dbms_output.put_line('Hello')('Hello again');
+
+
+
+
+
+
+SQL> create or replace procedure Second
+  2  is
+  3  begin
+  4  dbms_output.put_line('Hello'),('Hello again');
+  5  end;
+  6* /
+Procedure SECOND compiled
+
+Errors: check compiler log
+SQL> show errors;
+
+Errors for PROCEDURE HR.SECOND:
+
+LINE/COL ERROR
+-------- ------------------------------------------------------------------------------------
+4/30     PLS-00103: Encountered the symbol "," when expecting one of the following:
+
+
+
+
+
+SQL> create or replace procedure Second
+  2  is
+  3  begin
+  4  dbms_output.put_line('Hello').('Hello again');
+
+
+
+
+
+
+
+
+
+
+
+SQL> show errors;
+
+Errors for PROCEDURE HR.SECOND:
+
+LINE/COL ERROR
+-------- ------------------------------------------------------------------------------------
+4/31     PLS-00103: Encountered the symbol "(" when expecting one of the following:
+         
+
+
+
+
+
+SQL> create or replace procedure Second
+  2  is
+  3  begin
+  4  dbms_output.put_line('Hello') ('Hello again');
+  5  end;
+  6* /
+Procedure SECOND compiled
+
+Errors: check compiler log
+SQL> show errors;
+
+Errors for PROCEDURE HR.SECOND:
+
+LINE/COL ERROR
+-------- -------------------------------------------
+4/1      PL/SQL: Statement ignored
+4/1      PLS-00801: internal error [22503]
+SQL> call first();
+Hello
+my friends
+
+
+Call completed.
+
+
+SQL> create or replace procedure addition
+  2  is
+  3  a number(3);
+  4  b number(3);
+  5  c number(3);
+  6  begin
+  7  a:= 15;
+  8  b:= 20;
+  9  c:= a+b;
+ 10  dbms_output.put_line('The Result');
+ 11  dbms_output.put_line(c);
+ 12  end;
+ 13* /
+Procedure ADDITION compiled
+
+SQL> call addition();
+The Result
+35
+
+
+Call completed.
+
+
+SQL> create or replace procedure First
+  2  is
+  3  begin
+  4  dbms_output.put_line('Hello');
+  5  dbms_output.put_line('my friends');
+  6  end;
+  7  
+  8* /
+Procedure FIRST compiled
+
+SQL> call First();
+
+Call completed.
+
+SQL> set server output on;
+
+
+
+SQL> call First();
+Hello
+my friends
+
+
+
+
+
+
+
+
+SQL> create or replace procedure Second
+  2  is
+  3  begin
+  4  dbms_output.put_line('Hello')('Hello again');
+
+
+
+
+
+
+SQL> create or replace procedure Second
+  2  is
+  3  begin
+  4  dbms_output.put_line('Hello'),('Hello again');
+  5  end;
+  6* /
+Procedure SECOND compiled
+
+Errors: check compiler log
+SQL> show errors;
+
+Errors for PROCEDURE HR.SECOND:
+
+LINE/COL ERROR
+-------- ------------------------------------------------------------------------------------
+4/30     PLS-00103: Encountered the symbol "," when expecting one of the following:
+
+
+
+
+
+SQL> create or replace procedure Second
+  2  is
+  3  begin
+  4  dbms_output.put_line('Hello').('Hello again');
+
+
+
+
+
+
+
+
+
+
+
+SQL> show errors;
+
+Errors for PROCEDURE HR.SECOND:
+
+LINE/COL ERROR
+-------- ------------------------------------------------------------------------------------
+4/31     PLS-00103: Encountered the symbol "(" when expecting one of the following:
+         
+
+
+
+
+
+SQL> create or replace procedure Second
+  2  is
+  3  begin
+  4  dbms_output.put_line('Hello') ('Hello again');
+  5  end;
+  6* /
+Procedure SECOND compiled
+
+Errors: check compiler log
+SQL> show errors;
+
+Errors for PROCEDURE HR.SECOND:
+
+LINE/COL ERROR
+-------- -------------------------------------------
+4/1      PL/SQL: Statement ignored
+4/1      PLS-00801: internal error [22503]
+SQL> call first();
+Hello
+my friends
+
+
+Call completed.
+
+
+SQL> create or replace procedure addition
+  2  is
+  3  a number(3);
+  4  b number(3);
+  5  c number(3);
+  6  begin
+  7  a:= 15;
+  8  b:= 20;
+  9  c:= a+b;
+ 10  dbms_output.put_line('The Result');
+ 11  dbms_output.put_line(c);
+ 12  end;
+ 13* /
+Procedure ADDITION compiled
+
+SQL> call addition();
+The Result
+35
+
+
+Call completed.
+
+SQL> create or replace procedure add(A number, B number, C number)
+  2  is
+  3  result number(3);
+  4  begin
+  5  result :=A+B+C;
+  6  dbms_output.put_line('Result is'||result);
+  7  end;
+  8  /
+
+Error starting at line : 1 in command -
+create or replace procedure add(A number, B number, C number)
+is
+result number(3);
+begin
+result :=A+B+C;
+dbms_output.put_line('Result is'||result);
+
+
+
+
+
+
+
+
+SQL> create or replace procedure add(A number, B number, C number)
+  2  is
+  3  result number(3);
+  4  begin
+  5  resul :=A+B+C;
+  6  dbms_output.put_line('Result is'||result);
+  7  end;
+  8* /
+Error starting at line : 1 in command -
+create or replace procedure add(A number, B number, C number)
+is
+result number(3);
+begin
+resul :=A+B+C;
+dbms_output.put_line('Result is'||result);
+end;
+Error report -
+ORA-04050: invalid or missing procedure, function, or package name
+
+
+
+
+
+
+
+SQL> create or replace procedure add1(A number, B number, C number)
+  2  is
+  3  result number(3);
+  4  begin
+  5  resul :=A+B+C;
+  6  dbms_output.put_line('Result is'||result);
+  7  end;
+  8* /
+Procedure ADD1 compiled
+
+Errors: check compiler log
+SQL> show errors
+
+
+
+
+
+
+
+
+SQL> create or replace procedure add1(A number, B number, C number)
+  2  is
+  3  result number(3);
+  4  begin
+  5  result:=A+B+C;
+  6  dbms_output.put_line('Result is'||result);
+  7  end;
+  8* /
+Procedure ADD1 compiled
+
+
+
+
+
+
+
+
+SQL> create or replace procedure add1(A number, B number, C number)
+  2  is
+  3  result number(3);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SQL> create or replace procedure add1(A number, B number, C number)
+  2  is
+  3  result number(3);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SQL> call add1(5,10,7);
+Result is 22
+
+
+Call completed.
+
+SQL> 
+
+
+SQL> create or replace procedure createbankaccount (name char, actype char, city char)
+  2  is
+  3  begin
+  4  insert into bank values (( select upper(substr(Actype,1,1))||upper(substr(City,1,1))||lpad(nvl(max(substr(accno,3,3))+1,1),3,'0') from bank where substr(accno,1,1)=upper(substr(Actype,1,1))),Name,City);
+  5  end;
+  6* /
+Procedure CREATEBANKACCOUNT compiled
+
+
+SQL> select * from bank;
+ACCNO NAME                 ADDRESS             
+----- -------------------- --------------------
+sm001 james                manchester          
+sm002 tom                  manchester          
+ss003 iain                 swindon             
+
+
+
+
+SQL> create or replace procedure createbankaccount (name char, actype char, city char)
+  2  is
+  3  begin
+  4  insert into bank values (( select upper(substr(Actype,1,1))||upper(substr(City,1,1))||lpad(nvl(max(substr(accno,3,3))+1,1),3,'0') from bank where substr(accno,1,1)=upper(substr(Actype,1,1))),Name,City);
+  5  end;
+  6* /
+Procedure CREATEBANKACCOUNT compiled
+
+
+SQL> select * from bank;
+ACCNO NAME                 ADDRESS             
+----- -------------------- --------------------
+sm001 james                manchester          
+sm002 tom                  manchester          
+ss003 iain                 swindon             
+
+SQL> call createbankaccount('dave',s,m);
+
+Error starting at line : 1 in command -
+call createbankaccount('dave',s,m)
+Error report -
+ORA-06576: not a valid function or procedure name
+06576. 00000 -  "not a valid function or procedure name"
+*Cause:    Could not find a function (if an INTO clause was present) or
+           a procedure (if the statement did not have an INTO clause) to
+           call.
+
+
+SQL> call createbankaccount('dave','Saving','London');
+Call completed.
+
+
+SQL> select * from bank;
+
+ACCNO NAME                 ADDRESS             
+----- -------------------- --------------------
+SL001 dave                 London              
+sm001 james                manchester          
+sm002 tom                  manchester          
+ss003 iain                 swindon             
+
+
+SQL> call createbankaccount('david','Saving','London');
+Call completed.
+
+
+SQL> select * from bank;
+
+ACCNO NAME                 ADDRESS             
+----- -------------------- --------------------
+SL001 dave                 London              
+SL002 david                London              
+sm001 james                manchester          
+sm002 tom                  manchester          
+ss003 iain                 swindon             
+
+
+SQL> call createbankaccount('adam','Current','London');
+Call completed.
+
+
+SQL> select * from bank;
+
+ACCNO NAME                 ADDRESS             
+----- -------------------- --------------------
+SL001 dave                 London              
+SL002 david                London              
+CL001 adam                 London              
+sm001 james                manchester          
+sm002 tom                  manchester          
+ss003 iain                 swindon             
+
+6 rows selected. 
+
+
+SQL> call createbankaccount('adam','Savings','Swindon');
+Call completed.
+
+
+SQL> select * from bank;
+
+ACCNO NAME                 ADDRESS             
+----- -------------------- --------------------
+SL001 dave                 London              
+SL002 david                London              
+CL001 adam                 London              
+SS003 adam                 Swindon             
+sm001 james                manchester          
+sm002 tom                  manchester          
+ss003 iain                 swindon             
+
+7 rows selected. 
+
+
+SQL> call createbankaccount('tony','Savings','Swindon');
+Call completed.
+
+
+SQL> select * from bank;
+
+ACCNO NAME                 ADDRESS             
+----- -------------------- --------------------
+SL001 dave                 London              
+SL002 david                London              
+CL001 adam                 London              
+SS003 adam                 Swindon             
+SS004 tony                 Swindon             
+sm001 james                manchester          
+sm002 tom                  manchester          
+
+
+SQL> select * from employee;
+
+FIRST_NAME           LAST_NAME                SALARY EMPLOYEE_ID
+-------------------- -------------------- ---------- -----------
+adam                 dixon                      1000          14
+paul                 hats                       2000          20
+dave                 sheds                     45000          50
+
+
+
+
+SQL> call employee_info(14);
+adam                
+dixon               
+1000
+
+
+
+SQL> create or replace procedure employee_info(emno number)
+  2  is
+  3  fname char(20);
+  4  lname char(20);
+  5  sal number(20);
+  6  begin
+  7  select first_name, last_name, salary into fname, lname, sal from employee where employee_id=emno;
+  8  dbms_output.put_line(fname);
+  9  dbms_output.put_line(lname);
+ 10  dbms_output.put_line(sal);
+ 11  end;
+ 12* /
+Procedure EMPLOYEE_INFO compiled
+
+
+
+
+
+
